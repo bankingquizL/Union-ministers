@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bank Exam Quiz</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+}
+
+/* ========================= */
+/* TIMER AREA */
+/* ========================= */
+
+#timer-container{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#f4f6f9;
+    padding-bottom:10px;
+}
+
+#timer{
+    background:#222;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.timer-buttons{
+    text-align:center;
+}
+
+#pauseBtn,
+#resumeBtn{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin:5px;
+}
+
+#pauseBtn{
+    background:#ff9800;
+    color:white;
+}
+
+#resumeBtn{
+    background:#28a745;
+    color:white;
+}
+
+.question{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.question h3{
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.option:hover{
+    background:#f0f0f0;
+}
+
+.selected{
+    background:#cfe2ff;
+    border:2px solid #0d6efd;
+}
+
+.mark-btn{
+    margin-top:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#ff9800;
+    color:white;
+}
+
+.marked{
+    background:#ffcc80 !important;
+}
+
+.review-marked{
+    background:#e0e0e0 !important;
+    border:2px solid #9e9e9e;
+}
+
+.clear-btn{
+    margin-top:10px;
+    margin-left:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#dc3545;
+    color:white;
+}
+
+.submit-btn{
+    width:100%;
+    padding:15px;
+    font-size:20px;
+    border:none;
+    border-radius:10px;
+    background:#28a745;
+    color:white;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.result-box{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.review-btn{
+    padding:12px 20px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.review-question{
+    background:white;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.wrong{
+    color:red;
+    font-weight:bold;
+}
+
+.unanswered{
+    color:orange;
+    font-weight:bold;
+}
+
+.correct-answer{
+    background:#d4edda;
+    padding:10px;
+    border-radius:8px;
+    margin-top:10px;
+}
+
+.disabled-option{
+    pointer-events:none;
+    opacity:0.6;
+}
+
+.disabled-btn{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Bank Exam MCQ Quiz</h1>
+
+<!-- ========================= -->
+<!-- TIMER -->
+<!-- ========================= -->
+
+<div id="timer-container">
+
+    <div id="timer">
+        Time Left: 20:00
+    </div>
+
+    <div class="timer-buttons">
+
+        <button id="pauseBtn" onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button id="resumeBtn" onclick="resumeTimer()" disabled>
+            Resume
+        </button>
+
+    </div>
+
+</div>
+
+<div id="quiz"></div>
+
+<button class="submit-btn" onclick="submitQuiz()">
+Submit Quiz
+</button>
+
+</div>
+
+<script>
+
+// ===============================
+// QUESTIONS AREA
+// ===============================
+
+const questions = [
+  {q:"Which Union Minister is in charge of both the Ministry of Home Affairs and the Ministry of Co-operation in the Union Government?", options:["Amit Shah","Rajnath Singh","J. P. Nadda","Pralhad Joshi"], answer:0},
+  {q:"Annpurna Devi is the Union Minister responsible for which ministry, according to the given Union Council of Ministers list?", options:["Social Justice and Empowerment","Women and Child Development","Tribal Affairs","Minority Affairs"], answer:1},
+  {q:"Arjun Ram Meghwal holds Independent Charge of which ministry in the Union Government?", options:["Parliamentary Affairs","Corporate Affairs","Law and Justice","Planning"], answer:2},
+  {q:"Ashwini Vaishnaw is associated with three important portfolios. Which combination correctly identifies his ministries?", options:["Communications; Railways; Information and Broadcasting","Electronics and Information Technology; Communications; Railways","Information and Broadcasting; Commerce and Industry; Railways","Electronics and Information Technology; Information and Broadcasting; Railways"], answer:3},
+  {q:"Bhupender Yadav is the Union Minister responsible for which ministry?", options:["Environment, Forests and Climate Change","Earth Sciences","Jal Shakti","Agriculture and Farmers' Welfare"], answer:0},
+  {q:"C. R. Patil is the Union Minister in charge of which ministry?", options:["Environment, Forests and Climate Change","Power","Jal Shakti","Coal"], answer:2},
+  {q:"Chirag Paswan holds the Union portfolio of which ministry?", options:["Consumer Affairs, Food and Public Distribution","Micro, Small and Medium Enterprises","Heavy Industries","Food Processing Industries"], answer:3},
+  {q:"Dr. Jitendra Singh is responsible for multiple portfolios. Which of the following is NOT among the ministries assigned to him in the given list?", options:["Earth Sciences","Personnel, Public Grievances and Pensions","Science and Technology","Skill Development and Entrepreneurship"], answer:3},
+  {q:"G. Kishan Reddy is the Union Minister in charge of which two ministries?", options:["Coal and Mines","Steel and Mines","Coal and Steel","Mines and Heavy Industries"], answer:0},
+  {q:"Gajendra Singh Shekhawat is responsible for which combination of Union ministries?", options:["Tourism and Civil Aviation","Culture and Tourism","Culture and External Affairs","Tourism and Ports, Shipping and Waterways"], answer:1},
+  {q:"Giriraj Singh holds which Union Cabinet portfolio?", options:["Commerce and Industry","Food Processing Industries","Textiles","Consumer Affairs, Food and Public Distribution"], answer:2},
+  {q:"H. D. Kumaraswamy is the Union Minister responsible for which two ministries?", options:["Steel and Mines","Heavy Industries and Coal","Steel and Railways","Heavy Industries and Steel"], answer:3},
+  {q:"Hardeep Singh Puri is the Union Minister in charge of which ministry?", options:["Power","Petroleum and Natural Gas","Housing and Urban Affairs","Road Transport and Highways"], answer:1},
+  {q:"J. P. Nadda holds responsibility for which two Union ministries?", options:["Chemicals and Fertilizers; Health and Family Welfare","Health and Family Welfare; AYUSH","Chemicals and Fertilizers; Consumer Affairs","Health and Family Welfare; Science and Technology"], answer:0},
+  {q:"Jayant Chaudhary is the Union Minister responsible for which ministry?", options:["Labour and Employment","Micro, Small and Medium Enterprises","Skill Development and Entrepreneurship","Youth Affairs and Sports"], answer:2},
+  {q:"Jitan Ram Manjhi holds the Union portfolio of which ministry?", options:["Skill Development and Entrepreneurship","Social Justice and Empowerment","Tribal Affairs","Micro, Small and Medium Enterprises"], answer:3},
+  {q:"Jual Oram is the Union Minister in charge of which ministry?", options:["Minority Affairs","Tribal Affairs","Social Justice and Empowerment","Women and Child Development"], answer:1},
+  {q:"Jyotiraditya Scindia is responsible for which combination of ministries?", options:["Communications and Development of North Eastern Region","Civil Aviation and Communications","Communications and Electronics and Information Technology","Development of North Eastern Region and Tourism"], answer:0},
+  {q:"Kinjarapu Ram Mohan Naidu holds which Union Cabinet portfolio?", options:["Communications","Ports, Shipping and Waterways","Railways","Civil Aviation"], answer:3},
+  {q:"Kiren Rijiju is the Union Minister responsible for which two ministries?", options:["Parliamentary Affairs and Law and Justice","Minority Affairs and Parliamentary Affairs","Minority Affairs and Tribal Affairs","Parliamentary Affairs and Culture"], answer:1},
+  {q:"Manohar Lal Khattar holds responsibility for which combination of Union ministries?", options:["Power and Heavy Industries","Housing and Urban Affairs and Road Transport and Highways","Power and New and Renewable Energy","Housing and Urban Affairs and Power"], answer:3},
+  {q:"Mansukh Mandaviya is the Union Minister in charge of which two ministries?", options:["Health and Family Welfare; Labour and Employment","Youth Affairs and Sports; Skill Development and Entrepreneurship","Labour and Employment; Youth Affairs and Sports","Labour and Employment; Social Justice and Empowerment"], answer:2},
+  {q:"Narendra Modi, as mentioned in the given list, holds Additional Charge of which office?", options:["Prime Minister's Office","Cabinet Secretariat","Ministry of Personnel, Public Grievances and Pensions","Department of Space"], answer:0},
+  {q:"Nirmala Sitharaman is responsible for which combination of Union ministries?", options:["Finance and Commerce and Industry","Corporate Affairs and Consumer Affairs","Finance and Planning","Corporate Affairs and Finance"], answer:3},
+  {q:"Nitin Gadkari holds the Union portfolio of which ministry?", options:["Railways","Housing and Urban Affairs","Road Transport and Highways","Power"], answer:2},
+  {q:"Piyush Goyal is the Union Minister responsible for which ministry?", options:["Commerce and Industry","Finance","Corporate Affairs","Consumer Affairs, Food and Public Distribution"], answer:0},
+  {q:"Pralhad Joshi holds three Union portfolios. Which combination correctly identifies them?", options:["Education; Skill Development and Entrepreneurship; New and Renewable Energy","Consumer Affairs, Food and Public Distribution; Education; New and Renewable Energy","Consumer Affairs, Food and Public Distribution; Chemicals and Fertilizers; Education","Education; New and Renewable Energy; Power"], answer:1},
+  {q:"Prataprao Jadhav is the Union Minister responsible for which ministry?", options:["Health and Family Welfare","Tribal Affairs","AYUSH","Social Justice and Empowerment"], answer:2},
+  {q:"Rajnath Singh holds the Union portfolio of which ministry?", options:["Home Affairs","External Affairs","Road Transport and Highways","Defence"], answer:3},
+  {q:"Rao Inderjit Singh holds Independent Charge of which ministries according to the given list?", options:["Planning; Statistics and Programme Implementation","Statistics and Programme Implementation; Finance","Planning; Corporate Affairs","Planning; Parliamentary Affairs"], answer:0},
+  {q:"S. Jaishankar is the Union Minister responsible for which ministry?", options:["Home Affairs","External Affairs","Defence","Parliamentary Affairs"], answer:1},
+  {q:"Sarbananda Sonowal holds which Union Cabinet portfolio?", options:["Civil Aviation","Communications","Ports, Shipping and Waterways","Road Transport and Highways"], answer:2},
+  {q:"Shivraj Singh Chouhan is the Union Minister responsible for which two ministries?", options:["Rural Development; Panchayati Raj","Agriculture and Farmers' Welfare; Food Processing Industries","Agriculture and Farmers' Welfare; Cooperation","Agriculture and Farmers' Welfare; Rural Development"], answer:3},
+  {q:"Virendra Kumar Khatik is the Union Minister in charge of which ministry?", options:["Social Justice and Empowerment","Tribal Affairs","Minority Affairs","Women and Child Development"], answer:0},
+  {q:"Rajiv Ranjan (Lalan Singh) is responsible for which two Union ministries?", options:["Agriculture and Farmers' Welfare; Panchayati Raj","Panchayati Raj; Tribal Affairs","Animal Husbandry, Dairying and Fisheries; Panchayati Raj","Animal Husbandry, Dairying and Fisheries; Rural Development"], answer:2},
+  {q:"Which of the following correctly matches the Union Minister with the Ministry of Railways?", options:["Nitin Gadkari","Piyush Goyal","Kinjarapu Ram Mohan Naidu","Ashwini Vaishnaw"], answer:3},
+  {q:"Which of the following correctly matches the Union Minister with the Ministry of Defence?", options:["Rajnath Singh","Amit Shah","S. Jaishankar","Manohar Lal Khattar"], answer:0},
+  {q:"Which of the following correctly matches the Union Minister with the Ministry of External Affairs?", options:["Rajnath Singh","S. Jaishankar","Amit Shah","Piyush Goyal"], answer:1},
+  {q:"Which Union Minister is responsible for both the Ministry of Labour and Employment and the Ministry of Youth Affairs and Sports?", options:["Jayant Chaudhary","Jitan Ram Manjhi","Mansukh Mandaviya","Dr. Jitendra Singh"], answer:2},
+  {q:"Which of the following correctly matches the Union Minister with the Ministry of Education and the Ministry of New and Renewable Energy?", options:["Ashwini Vaishnaw","Manohar Lal Khattar","Bhupender Yadav","Pralhad Joshi"], answer:3},
+  {q:"Which of the following correctly matches the Union Minister with both Animal Husbandry, Dairying and Fisheries and Panchayati Raj?", options:["Rajiv Ranjan (Lalan Singh)","Shivraj Singh Chouhan","Jual Oram","Pralhad Joshi"], answer:0}
+
+];
+
+
+
+// ===============================
+// VARIABLES
+// ===============================
+
+let userAnswers = new Array(questions.length).fill(null);
+
+let markedForReview = new Array(questions.length).fill(false);
+
+let submitted = false;
+
+// ===============================
+// LOAD QUIZ
+// ===============================
+
+function loadQuiz(){
+
+    const quizDiv = document.getElementById("quiz");
+
+    questions.forEach((question,index)=>{
+
+        const qDiv = document.createElement("div");
+
+        qDiv.classList.add("question");
+
+        qDiv.id = `question_${index}`;
+
+        qDiv.innerHTML = `
+        <h3>Q${index+1}. ${question.q}</h3>
+        `;
+
+        question.options.forEach((option,optIndex)=>{
+
+            const opt = document.createElement("div");
+
+            opt.classList.add("option");
+
+            opt.innerText = option;
+
+            opt.onclick = ()=>selectOption(index,optIndex,opt);
+
+            opt.id = `q${index}_opt${optIndex}`;
+
+            qDiv.appendChild(opt);
+
+        });
+
+        // MARK BUTTON
+
+        const markBtn = document.createElement("button");
+
+        markBtn.innerText = "Mark For Review";
+
+        markBtn.classList.add("mark-btn");
+
+        markBtn.onclick = ()=>toggleMark(index,markBtn);
+
+        qDiv.appendChild(markBtn);
+
+        // CLEAR BUTTON
+
+        const clearBtn = document.createElement("button");
+
+        clearBtn.innerText = "Clear";
+
+        clearBtn.classList.add("clear-btn");
+
+        clearBtn.onclick = ()=>clearAnswer(index);
+
+        qDiv.appendChild(clearBtn);
+
+        quizDiv.appendChild(qDiv);
+
+    });
+
+}
+
+// ===============================
+// SELECT OPTION
+// ===============================
+
+function selectOption(qIndex,optIndex,element){
+
+    if(submitted) return;
+
+    userAnswers[qIndex] = optIndex;
+
+    const options = document.querySelectorAll(`[id^="q${qIndex}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+    element.classList.add("selected");
+
+}
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleMark(index,button){
+
+    markedForReview[index] = !markedForReview[index];
+
+    const questionBox = document.getElementById(`question_${index}`);
+
+    if(markedForReview[index]){
+
+        button.classList.add("marked");
+
+        button.innerText = "Marked For Review";
+
+        questionBox.classList.add("review-marked");
+
+    }else{
+
+        button.classList.remove("marked");
+
+        button.innerText = "Mark For Review";
+
+        questionBox.classList.remove("review-marked");
+
+    }
+
+}
+
+// ===============================
+// CLEAR ANSWER
+// ===============================
+
+function clearAnswer(index){
+
+    if(submitted) return;
+
+    userAnswers[index] = null;
+
+    const options = document.querySelectorAll(`[id^="q${index}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+}
+
+// ===============================
+// SUBMIT QUIZ
+// ===============================
+
+function submitQuiz(){
+
+    if(submitted) return;
+
+    submitted = true;
+
+    clearInterval(timer);
+
+    let score = 0;
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        if(userAns === null){
+
+            unansweredCount++;
+
+        }
+        else if(userAns === question.answer){
+
+            score += 1;
+            correctCount++;
+
+        }
+        else{
+
+            score -= 0.25;
+            wrongCount++;
+
+        }
+
+    });
+
+    let attempted = correctCount + wrongCount;
+
+    let accuracy = attempted > 0
+    ? ((correctCount/attempted)*100).toFixed(2)
+    : 0;
+
+    document.body.innerHTML = `
+
+    <div class="container">
+
+        <div class="result-box">
+
+            <h1>Quiz Submitted ✅</h1>
+
+            <h2>Total Score: ${score.toFixed(2)}</h2>
+
+            <h3>Correct Answers: ${correctCount}</h3>
+
+            <h3>Wrong Answers: ${wrongCount}</h3>
+
+            <h3>Unanswered Questions: ${unansweredCount}</h3>
+
+            <h3>Accuracy: ${accuracy}%</h3>
+
+            <button class="review-btn" onclick="reviewAnswers()">
+            Review Answers
+            </button>
+
+            <div id="reviewSection"></div>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+// ===============================
+// REVIEW ANSWERS
+// ===============================
+
+function reviewAnswers(){
+
+    const reviewSection = document.getElementById("reviewSection");
+
+    let html = `<h1 style="margin-top:40px;">Review Section</h1>`;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        let status = "";
+        let marks = "";
+
+        if(userAns === null){
+
+            status = `<span class="unanswered">Unanswered</span>`;
+            marks = `0 Marks`;
+
+        }
+        else if(userAns === question.answer){
+
+            status = `<span class="correct">Correct ✅</span>`;
+            marks = `+1 Mark`;
+
+        }
+        else{
+
+            status = `<span class="wrong">Wrong ❌</span>`;
+            marks = `-0.25 Mark`;
+
+        }
+
+        html += `
+
+        <div class="review-question">
+
+            <h3>Q${index+1}. ${question.q}</h3>
+
+            <p>${status}</p>
+
+            <p><b>Marks:</b> ${marks}</p>
+
+            <p>
+            <b>Your Answer:</b>
+            ${
+                userAns === null
+                ? "Not Attempted"
+                : question.options[userAns]
+            }
+            </p>
+
+            <div class="correct-answer">
+            <b>Correct Answer:</b>
+            ${question.options[question.answer]}
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    reviewSection.innerHTML = html;
+
+}
+
+// ===============================
+// TIMER
+// ===============================
+
+let time = 1800;
+
+let timer;
+
+let isPaused = false;
+
+function startTimer(){
+
+    timer = setInterval(()=>{
+
+        if(!isPaused){
+
+            let minutes = Math.floor(time/60);
+
+            let seconds = time%60;
+
+            document.getElementById("timer").innerText =
+            `Time Left: ${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+
+            time--;
+
+            if(time < 0){
+
+                clearInterval(timer);
+
+                alert("Time is up! Quiz auto-submitted.");
+
+                submitQuiz();
+
+            }
+
+        }
+
+    },1000);
+
+}
+
+// ===============================
+// PAUSE TIMER
+// ===============================
+
+function pauseTimer(){
+
+    if(submitted) return;
+
+    isPaused = true;
+
+    document.getElementById("pauseBtn").disabled = true;
+
+    document.getElementById("resumeBtn").disabled = false;
+
+    // Disable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.add("disabled-option");
+    });
+
+    // Disable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = true;
+        btn.classList.add("disabled-btn");
+    });
+
+}
+// ===============================
+// RESUME TIMER
+// ===============================
+
+function resumeTimer(){
+
+    if(submitted) return;
+
+    isPaused = false;
+
+    document.getElementById("pauseBtn").disabled = false;
+
+    document.getElementById("resumeBtn").disabled = true;
+
+    // Enable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.remove("disabled-option");
+    });
+
+    // Enable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = false;
+        btn.classList.remove("disabled-btn");
+    });
+
+}
+// ===============================
+
+loadQuiz();
+
+startTimer();
+
+</script>
+
+</body>
+</html>
